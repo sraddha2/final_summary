@@ -1,0 +1,9 @@
+azure-ai-textanalytics
+beautifulsoup4
+requests
+flask
+python-dotenv
+streamlit
+azure-identity
+azure-keyvault-secrets
+openai
