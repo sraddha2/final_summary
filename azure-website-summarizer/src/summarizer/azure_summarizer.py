@@ -1,6 +1,7 @@
 import os
 from azure.ai.textanalytics import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
+from utils.web_loader import load_web_content
 import openai
 
 class AzureSummarizer:
@@ -19,15 +20,16 @@ class AzureSummarizer:
         self.openai_deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT")
 
     def summarize_text(self, text, max_sentences=3):
-        response = self.client.extract_summary(
+        poller = self.client.begin_extract_summary(
             documents=[text],
             max_sentence_count=max_sentences
         )
-        summary = " ".join([s.text for s in response[0].sentences])
+        result = poller.result()
+        result_list = list(result)
+        summary = " ".join([s.text for s in result_list[0].sentences])
         return summary
 
     def summarize_url(self, url, max_sentences=3):
-        from utils.web_loader import load_web_content
         content = load_web_content(url)
         return self.summarize_text(content, max_sentences=max_sentences)
 
@@ -53,4 +55,4 @@ class AzureSummarizer:
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
-            return f"Error from Azure OpenAI: {e}"
+            return f"Error from Azure OpenAI: {str(e)}"
